@@ -1,33 +1,29 @@
 pipeline {
     agent any
-
-    environment {
-        DB_PASSWORD = credentials('DB_PASSWORD')
-    }
-
+	stages {
         stage('cleanup') {
             steps {
                 sh '''
-                if docker logs duo-task; then
-                    if docker exec duo-task ls; then
-                        docker stop duo-task
+                if docker logs nginx; then
+                    if docker exec nginx ls; then
+                        docker stop nginx
+		else
+			sleep 1
                     fi
-                    docker rm duo-task
+                    docker rm nginx
+		else sleep 1
                 fi
-                if docker logs duo-task; then
-                    if docker exec duo-task ls; then
-                        docker stop duo-task
+                if docker logs flask-app; then
+                    if docker exec flask-app ls; then
+                        docker stop flask-app
+		else
+			sleep 1
                     fi
-                    docker rm duo-task
+                    docker rm flask-app
+		else
+			sleep 1
                 fi
-                if docker logs duo-task; then
-                    if docker exec duo-task ls; then
-                        docker stop duo-task
-                    fi
-                    docker rm duo-task
-                fi
-                docker rmi duo-task:v1
-                '''
+		'''
             }
         }
         stage('Build') {
@@ -39,8 +35,10 @@ pipeline {
             steps {
                 sh '''
                 docker network inspect duo-net && sleep 1 || docker network create duo-net
-                docker run -d -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD} --name duo-task --network duo-net jordangrindrod/duo-task:latest
-                '''
+		docker run -d --name duo-task --network duo-net duo-task:v1
+		docker run -d -p 80:80 --network duo-net --mount type=bind,source=$(pwd)/nginx.conf,target=etc/nginx/nginx.conf --name nginx nginx:alpine
+		'''
             }
         }
     }
+}
