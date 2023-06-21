@@ -32,14 +32,14 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker build -t duo-task:v2 .'
+                sh 'docker build -t duo-task:v1 .'
             }
         }
         stage('run containers') {
             steps {
                 sh '''
                 docker network inspect duo-net && sleep 1 || docker network create duo-net
-                docker run -d -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD} --name duo-task --network duo-net jordangrindrod/duo-task:latest
+                docker run -d -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD} --name duo-task --network duo-net duo-task:latest
                 '''
             }
         }
