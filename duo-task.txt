@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        DB_PASSWORD = credentials('DB_PASSWORD')
+    }
+
+        stage('cleanup') {
+            steps {
+                sh '''
+                if docker logs duo-task; then
+                    if docker exec duo-task ls; then
+                        docker stop duo-task
+                    fi
+                    docker rm duo-task
+                fi
+                if docker logs duo-task; then
+                    if docker exec duo-task ls; then
+                        docker stop duo-task
+                    fi
+                    docker rm duo-task
+                fi
+                if docker logs duo-task; then
+                    if docker exec duo-task ls; then
+                        docker stop duo-task
+                    fi
+                    docker rm duo-task
+                fi
+                docker rmi duo-task:v1
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t duo-task:v2 .'
+            }
+        }
+        stage('run containers') {
+            steps {
+                sh '''
+                docker network inspect duo-net && sleep 1 || docker network create duo-net
+                docker run -d -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD} --name duo-task --network duo-net jordangrindrod/duo-task:latest
+                '''
+            }
+        }
+    }
+}
