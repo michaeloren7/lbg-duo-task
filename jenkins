@@ -11,7 +11,8 @@ pipeline {
 			sleep 1
                     fi
                     docker rm nginx
-		else sleep 1
+		else
+			sleep 1
                 fi
                 if docker logs flask-app; then
                     if docker exec flask-app ls; then
