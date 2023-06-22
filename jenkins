@@ -1,19 +1,15 @@
-version: "3.7"
-services:
-  chaperoo-client:
-    image: duo-task:v1
-    build: .
-    ports:
-      - target: 80
-        published: 80
-    networks:
-      - duo-net
-  chaperoo-service:
-    image: nginx:alpine
-    build:
-    networks:
-      - duo-net
-    deploy:
-      replicas: 3
-networks:
-  duo-net:
+pipeline {
+    agent any
+	stages {
+        stage('build') {
+            steps {
+                sh 'docker compose build'
+            }
+        }
+        stage('run') {
+            steps {
+                sh 'docker-compose up -d'
+            }
+        }
+    }
+}
