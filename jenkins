@@ -7,8 +7,8 @@ services:
       - target: 80
         published: 80
     networks:
-      - duo-net   
-  chaperoo-service: 
+      - duo-net
+  chaperoo-service:
     image: nginx:alpine
     build:
     networks:
